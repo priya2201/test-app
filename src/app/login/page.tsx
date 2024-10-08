@@ -11,6 +11,7 @@ import {
   Snackbar,
   FormControlLabel,
   Checkbox,
+  FormHelperText,
 } from "@mui/material";
 export default function LogInPage() {
   const router = useRouter();
@@ -21,6 +22,9 @@ export default function LogInPage() {
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  console.log(emailError, "emailerror", passwordError, "pe");
   useEffect(() => {
     const savedEmail = localStorage.getItem("email");
     const savedPassword = localStorage.getItem("password");
@@ -31,6 +35,10 @@ export default function LogInPage() {
   }, []);
   const fetching = async (e: React.FormEvent) => {
     e.preventDefault();
+    setEmailError(null);
+    setPasswordError(null);
+    setErrorMessages([]);
+
     try {
       const response = await fetch("http://localhost:3002/api/user/login", {
         method: "POST",
@@ -42,23 +50,34 @@ export default function LogInPage() {
       const data = await response.json();
 
       if (!response.ok) {
-        if (data.errors) {
-          const messages = data.errors.map((error: any) => {
-            // Adjust according to your validation structure
-            return (
-              Object.values(error.constraints || {}).join(", ") ||
-              "Validation error"
-            );
+        if (Array.isArray(data.errors)) {
+          // const messages = data.errors.map((error: any) => {
+          //   // Adjust according to your validation structure
+          //   return (
+          //     Object.values(error.constraints || {}).join(", ") ||
+          //     "Validation error"
+          //   );
+          // });
+          // setErrorMessages(messages);
+          data.errors.forEach((error: any) => {
+            if (error.property === "email" && error.constraints.isEmail) {
+              setEmailError(error.constraints.isEmail);
+            }
+            if (error.property === "password" && error.constraints.isLength) {
+              setPasswordError(error.constraints.isLength);
+            }
           });
-          setErrorMessages(messages);
         } else {
           setErrorMessages([data.message || "An error occurred"]);
+          console.error(data.message);
+          setOpenSnackbar(true);
         }
-        setOpenSnackbar(true); // Open Snackbar to show errors
+        // setOpenSnackbar(true); // Open Snackbar to show errors
         return;
       }
       console.log(data, data.signature);
       localStorage.setItem("token", data.signature);
+      console.log(localStorage.getItem("token"), "Token ");
       if (rememberMe) {
         localStorage.setItem("email", user.email);
         localStorage.setItem("password", user.password);
@@ -66,6 +85,8 @@ export default function LogInPage() {
         localStorage.removeItem("email");
         localStorage.removeItem("password");
       }
+      console.log(localStorage.getItem("token"), "Token Before Routing");
+
       router.push("/home");
     } catch (error: any) {
       if (error instanceof Error) {
@@ -73,8 +94,9 @@ export default function LogInPage() {
       } else {
         setErrorMessages(["An unknown error occurred"]);
       }
-      localStorage.removeItem("token");
+      // localStorage.removeItem("token");
       setOpenSnackbar(true);
+      console.error("Error", error);
     }
   };
 
@@ -119,7 +141,9 @@ export default function LogInPage() {
             required
             margin="normal"
             fullWidth
+            error={!!emailError}
           />{" "}
+          {emailError && <FormHelperText error>{emailError}</FormHelperText>}
           <TextField
             label="Password"
             type="password"
@@ -129,8 +153,13 @@ export default function LogInPage() {
             required
             margin="normal"
             fullWidth
+            error={!!passwordError}
           />{" "}
-          <FormControlLabel sx={{color:'black'}}
+          {passwordError && (
+            <FormHelperText error>{passwordError}</FormHelperText>
+          )}
+          <FormControlLabel
+            sx={{ color: "black" }}
             control={
               <Checkbox
                 checked={rememberMe}
@@ -139,7 +168,6 @@ export default function LogInPage() {
             }
             label="Remember Me"
           />
-
           <Button
             variant="contained"
             color="primary"
