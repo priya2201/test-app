@@ -1,17 +1,34 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Container, Typography, TextField, Button, Box ,Snackbar} from "@mui/material";
+import {
+  Container,
+  Typography,
+  TextField,
+  Button,
+  Box,
+  Snackbar,
+  FormControlLabel,
+  Checkbox,
+} from "@mui/material";
 export default function LogInPage() {
   const router = useRouter();
   const [user, setUser] = useState({
     email: "",
     password: "",
   });
-  const [errorMessages, setErrorMessages] = useState<string[]>([])
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [openSnackbar, setOpenSnackbar] = useState(false);
-
+  const [rememberMe, setRememberMe] = useState(false);
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("email");
+    const savedPassword = localStorage.getItem("password");
+    if (savedEmail && savedPassword) {
+      setUser({ email: savedEmail, password: savedPassword });
+      setRememberMe(true);
+    }
+  }, []);
   const fetching = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -20,7 +37,7 @@ export default function LogInPage() {
         headers: {
           "Content-Type": " application/json",
         },
-        body: JSON.stringify(user),
+        body: JSON.stringify({ ...user, rememberMe }),
       });
       const data = await response.json();
 
@@ -32,19 +49,23 @@ export default function LogInPage() {
               Object.values(error.constraints || {}).join(", ") ||
               "Validation error"
             );
-          })
+          });
           setErrorMessages(messages);
-
-        }
-        else {
+        } else {
           setErrorMessages([data.message || "An error occurred"]);
-
         }
         setOpenSnackbar(true); // Open Snackbar to show errors
         return;
       }
       console.log(data, data.signature);
-      localStorage.setItem('token', data.signature)
+      localStorage.setItem("token", data.signature);
+      if (rememberMe) {
+        localStorage.setItem("email", user.email);
+        localStorage.setItem("password", user.password);
+      } else {
+        localStorage.removeItem("email");
+        localStorage.removeItem("password");
+      }
       router.push("/home");
     } catch (error: any) {
       if (error instanceof Error) {
@@ -54,14 +75,12 @@ export default function LogInPage() {
       }
       localStorage.removeItem("token");
       setOpenSnackbar(true);
-    };
-  }
-    
-    const handleCloseSnackbar = () => {
-      setOpenSnackbar(false);
-    };
-  
-  
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
 
   return (
     <>
@@ -111,6 +130,16 @@ export default function LogInPage() {
             margin="normal"
             fullWidth
           />{" "}
+          <FormControlLabel sx={{color:'black'}}
+            control={
+              <Checkbox
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+              />
+            }
+            label="Remember Me"
+          />
+
           <Button
             variant="contained"
             color="primary"
@@ -119,16 +148,16 @@ export default function LogInPage() {
           >
             Log In
           </Button>
-
           <Typography sx={{ marginTop: 2, color: "black" }}>
             Don't Have an Account? <Link href="/signup">Visit Signup page</Link>
           </Typography>
         </Box>
         <Snackbar
-        open={openSnackbar}
+          open={openSnackbar}
           autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        message={errorMessages.join(", ")}       />
+          onClose={handleCloseSnackbar}
+          message={errorMessages.join(", ")}
+        />
       </Container>
     </>
   );

@@ -8,11 +8,10 @@ export default function Logout() {
   const router = useRouter();
   const [errorMessages, setErrorMessages] = useState<string | null>(null); // Store error messages
   const [openSnackbar, setOpenSnackbar] = useState(false);
-
+  
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
-      // If no token, redirect to login
       router.push("/login");
     }
   }, [router]);

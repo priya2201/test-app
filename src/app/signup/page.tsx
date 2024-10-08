@@ -20,6 +20,7 @@ export default function SignUpPage() {
     address: "",
     firstName: "",
     lastName: "",
+    confirmPassword:""
   });
 
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
@@ -148,6 +149,16 @@ export default function SignUpPage() {
           variant="outlined"
           value={user.password}
           onChange={(e) => setUser({ ...user, password: e.target.value })}
+          required
+          margin="normal"
+          fullWidth
+        />
+              <TextField
+          label="Confirm Password"
+          type="password"
+          variant="outlined"
+          value={user.confirmPassword}
+          onChange={(e) => setUser({ ...user, confirmPassword: e.target.value })}
           required
           margin="normal"
           fullWidth
