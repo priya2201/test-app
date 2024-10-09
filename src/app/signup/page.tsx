@@ -113,7 +113,7 @@ export default function SignUpPage() {
         return;
       }
 
-      router.push("/login");
+      router.push("/loginValidation");
     } catch (error) {
       console.error(error);
     }

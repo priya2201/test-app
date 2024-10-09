@@ -47,32 +47,52 @@ export default function Logout() {
 
   return (
     <>
-      <Button
-        variant="outlined"
-        color="error"
-        onClick={handleLogout}
-        sx={{ marginTop: 2, padding: 1.5, fontSize: 16, alignSelf: "flex-end" }}
-      >
-        Logout
-      </Button>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100lvh",
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundImage:
+            'url("https://img.freepik.com/free-photo/abstract-luxury-gradient-blue-background-smooth-dark-blue-with-black-vignette-studio-banner_1258-72289.jpg")', // Your background image URL
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          zIndex: 0,
         }}
       >
-        <Typography sx={{ textAlign: "center", color: "black" }}>
-          Welcome on Home Page
-        </Typography>
-      </Box>
-      <Snackbar
-        open={openSnackbar}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-        message={errorMessages || message}
-      />
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={handleLogout}
+          sx={{
+            marginTop: 2,
+            padding: 1.5,
+            fontSize: 16,
+            alignSelf: "flex-end",
+          }}
+        >
+          Logout
+        </Button>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "100lvh",
+          }}
+        >
+          <Typography sx={{ textAlign: "center", color: "black" }}>
+            Welcome on Home Page
+          </Typography>
+        </Box>
+        <Snackbar
+          open={openSnackbar}
+          autoHideDuration={6000}
+          onClose={handleCloseSnackbar}
+          message={errorMessages || message}
+        />
+      </div>
     </>
   );
 }
