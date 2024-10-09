@@ -1,14 +1,13 @@
 "use client";
-import { Box, Typography, Button,Snackbar } from "@mui/material";
+import { Box, Typography, Button, Snackbar } from "@mui/material";
 import { useRouter } from "next/navigation";
-import { useEffect ,useState} from "react";
-
+import { useEffect, useState } from "react";
 
 export default function Logout() {
   const router = useRouter();
   const [errorMessages, setErrorMessages] = useState<string | null>(null); // Store error messages
   const [openSnackbar, setOpenSnackbar] = useState(false);
-  
+  const [message, setMessage] = useState(null);
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -22,27 +21,29 @@ export default function Logout() {
         method: "POST",
         // credentials:'include'
       });
-      const data = await response.json(); 
+      const data = await response.json();
 
-        if (response.ok) {
-            localStorage.removeItem("token");
-
-        router.push("/login");
+      if (response.ok) {
+        setMessage(data.message);
+        setOpenSnackbar(true);
+        setTimeout(() => {
+          localStorage.removeItem("token");
+          router.push("/login");
+        }, 2000);
       } else {
         setErrorMessages(data.message || "An unknown error occurred");
-        setOpenSnackbar(true);       }
+        setOpenSnackbar(true);
+      }
     } catch (error) {
       console.error("Error logging out:", error);
       setErrorMessages("An unexpected error occurred");
       setOpenSnackbar(true);
-
     }
   };
 
   const handleCloseSnackbar = () => {
     setOpenSnackbar(false);
   };
-
 
   return (
     <>
@@ -70,9 +71,8 @@ export default function Logout() {
         open={openSnackbar}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
-        message={errorMessages}
+        message={errorMessages || message}
       />
-
     </>
   );
 }
