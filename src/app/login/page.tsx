@@ -103,7 +103,7 @@ export default function LogInPage() {
       }
       console.log(localStorage.getItem("token"), "Token Before Routing");
 
-      router.push("/home");
+      router.push("/dashboard");
     } catch (error: any) {
       if (error instanceof Error) {
         setErrorMessages([error.message]);
